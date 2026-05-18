@@ -1,4 +1,4 @@
 from app.db.session import Base
-from app.models.documents import Documents
+from app.models.document import Document
 
-__all__ = ["Base", "Documents"]
+__all__ = ["Base", "Document"]
