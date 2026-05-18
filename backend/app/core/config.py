@@ -5,6 +5,8 @@ class Settings(BaseSettings):
     APP_NAME: str
     ENVIRONMENT: str
     DATABASE_URL: str
+
+    OLLAMA_URL : str
     OLLAMA_MODEL: str
 
     FAISS_INDEX_PATH: str = os.path.join(os.path.dirname(__file__), "../../faiss_index")
