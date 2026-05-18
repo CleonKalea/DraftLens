@@ -1,0 +1,22 @@
+# Web Framework & Server
+fastapi>=0.110.0
+uvicorn[standard]>=0.28.0
+python-multipart>=0.0.9
+
+# Asynchronous Database & Migration
+sqlalchemy>=2.0.0
+asyncpg>=0.29.0
+psycopg2-binary>=2.9.9
+alembic>=1.13.1
+
+# Configuration & Validation (Pydantic V2)
+pydantic>=2.6.0
+pydantic-settings>=2.2.0
+
+# AI, Vector Database & RAG Stack
+langchain>=0.1.0
+langchain-community>=0.0.20
+langchain-ollama>=0.0.1
+faiss-cpu>=1.7.4
+pypdf>=4.1.0
+sentence-transformers>=2.5.1
