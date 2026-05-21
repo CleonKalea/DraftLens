@@ -1,5 +1,5 @@
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import select, update
 from app.models import Document
 
 class DocumentRepository:
@@ -22,3 +22,13 @@ class DocumentRepository:
 
         result = await self.db.execute(query)
         return result.scalar_one_or_none()
+    
+    async def update_vectorized_status(self, document_id: int) -> bool:
+        query = (
+            update(Document)
+            .where(Document.id == document_id)
+            .values(vectorized=1)
+            )
+        
+        result = await self.db.execute(query)
+        await self.db.commit()

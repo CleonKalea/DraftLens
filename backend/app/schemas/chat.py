@@ -3,7 +3,7 @@ from typing import List
 
 class ChatQueryRequest(BaseModel):
     document_id: int
-    question:   str
+    question: str
 
 class ChatQueryResponse(BaseModel):
     answer: str

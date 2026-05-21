@@ -67,7 +67,7 @@ class DocumentService:
         
     
     # RAG Pipeline
-    async def vectorize_document_rag(self, file_path: str, document_id: str):
+    async def vectorize_document_rag(self, document_id: int, file_path: str):
         # Extract Text
         raw_text = self._extract_text_from_pdf(file_path)
 
@@ -82,18 +82,27 @@ class DocumentService:
 
         # Temp: Testing purpose
         sample_context = "\n----\n".join(chunks[:3])
+        print(sample_context)
 
-        return{
-            "status": "success",
-            "total_chunks": len(chunks),
-            "sample_context_preview": sample_context
-        }
-    
-    async def query_document_rag(self, document_id: str, question: str):
+        await self.repo.update_vectorized_status(document_id=document_id)
+
+
+    async def query_document_rag(self, document_id: int, question: str):
+
+        try:
+            document = await self.repo.get_document(document_id=document_id)
+
+            print(document)
+
+            if document.vectorized == 0:
+                print("Vectorizing")
+                await self.vectorize_document_rag(document_id=document.id, file_path=document.file_path)
+        except Exception as e:
+            raise Exception("document id doesnt exist")
         
         # Take chunks of relevant text vector from chromadb based on user question
         relevant_chunks = self.vector_service.query_relevant_chunks(
-            document_id=document_id,
+            document_id=document.id,
             query=question,
             top_k=3
         )

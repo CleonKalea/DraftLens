@@ -12,10 +12,10 @@ async def query_document(
     payload: ChatQueryRequest,
     db: AsyncSession = Depends(get_async_db)
 ):
-    doc_service = DocumentService(db)
+    document_service = DocumentService(db)
     try:
-        result = await doc_service.query_document_rag(
-            document_id=str(payload.document_id),
+        result = await document_service.query_document_rag(
+            document_id=int(payload.document_id),
             question=payload.question
         )
         return result
