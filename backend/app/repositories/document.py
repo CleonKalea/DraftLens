@@ -12,9 +12,7 @@ class DocumentRepository:
             Document.filename)
 
         result = await self.db.execute(query)
-
         documents = result.all()
-
         return documents
 
     async def create_document(self, filename:str, file_path: str) -> Document:
@@ -41,5 +39,5 @@ class DocumentRepository:
             .values(vectorized=1)
             )
         
-        result = await self.db.execute(query)
+        await self.db.execute(query)
         await self.db.commit()

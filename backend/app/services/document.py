@@ -31,7 +31,6 @@ class DocumentService:
             raise Exception(f"Failed to retrieve documents list")
         
 
-
     def _extract_text_from_pdf(self, file_path:str) -> str:
         try:
             reader = PdfReader(file_path)
@@ -73,8 +72,6 @@ class DocumentService:
 
         return await self.repo.create_document(filename=clean_filename, file_path=file_path)
         
-    
-    # RAG Pipeline
     async def vectorize_document_rag(self, document_id: int, file_path: str):
         # Extract Text
         raw_text = self._extract_text_from_pdf(file_path)
@@ -89,8 +86,8 @@ class DocumentService:
         self.vector_service.store_chunks(document_id=document_id, chunks=chunks)
 
         # Temp: Testing purpose
-        sample_context = "\n----\n".join(chunks[:3])
-        print(sample_context)
+        # sample_context = "\n----\n".join(chunks[:3])
+        # print(sample_context)
 
         await self.repo.update_vectorized_status(document_id=document_id)
 
@@ -126,13 +123,13 @@ class DocumentService:
 
         # Strict Prompt to reduce AI Hallucination
         system_instruction = (
-            "Anda adalah DraftLens AI, seorang asisten ahli hukum yang presisi dan objektif. "
-            "Tugas Anda adalah menjawab pertanyaan pengguna HANYA berdasarkan dokumen referensi yang disediakan di bawah ini.\n"
-            "Aturan ketat:\n"
-            "1. Jika jawabannya tidak ada di dalam dokumen referensi, katakan secara jujur bahwa Anda tidak mengetahuinya.\n"
-            "2. Jangan mengarang informasi atau menggunakan pengetahuan luar di luar dokumen yang diberikan.\n"
-            "3. Berikan jawaban yang terstruktur dan mudah dipahami.\n\n"
-            f"DOKUMEN REFERENSI:\n{context_text}"
+            "You are DraftLens AI, a precise and objective legal assistant. "
+            "Your task is to answer the user's questions ONLY based on the reference documents provided below.\n"
+            "Strict rules:\n"
+            "1. If the answer is not contained in the reference documents, honestly state that you do not know.\n"
+            "2. Do not fabricate information or use external knowledge beyond the provided documents.\n"
+            "3. Provide answers that are well-structured and easy to understand.\n\n"
+            f"REFERENCE DOCUMENTS:\n{context_text}"
         )
 
         # AI Endpoint
@@ -155,20 +152,7 @@ class DocumentService:
                     "answer": ai_answer,
                     # "source_chunks": relevant_chunks
                 }
-            
-# ─── PERBAIKI BAGIAN INI ───
-        except httpx.HTTPStatusError as e:
-            # Menangkap jika Ollama merespon tapi status kodenya error (misal 404 atau 500)
-            raise Exception(f"Ollama mengembalikan status error: {e.response.status_code} - {e.response.text}")
-            
-        except httpx.RequestError as e:
-            # Menangkap jika gagal konek ke Ollama (misal Ollama belum dinyalakan)
-            raise Exception(f"Gagal terhubung ke Ollama lokal di {e.request.url}. Apakah Ollama sudah dinyalakan?")
-            
-        except Exception as e:
-            # Menangkap error umum lainnya
-            raise Exception(f"Terjadi kesalahan internal pada RAG: {str(e)}")
 
-        except httpx.HTTPError() as e :
-            raise Exception(f"Gagal berkomunikasi dengan Ollama lokal; {str(e)}")
+        except Exception as e:
+            raise Exception(f"Internal Server Error on RAG: {str(e)}")
         

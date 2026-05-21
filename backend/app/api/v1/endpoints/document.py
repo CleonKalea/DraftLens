@@ -1,9 +1,8 @@
 import os
-import shutil
 from fastapi import APIRouter, Depends, UploadFile, File, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.session import get_async_db
-from app.schemas.document import UploadDocumentResponse, RagUploadResponse, AnalyzeDocumentResponse, AnalyzeDocumentRequest, DocumentListResponse
+from app.schemas.document import UploadDocumentResponse, AnalyzeDocumentResponse, AnalyzeDocumentRequest, DocumentListResponse
 from app.services.document import DocumentService
 
 router = APIRouter()

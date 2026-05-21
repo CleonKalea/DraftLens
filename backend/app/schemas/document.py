@@ -23,15 +23,5 @@ class AnalyzeDocumentRequest(BaseModel):
 class AnalyzeDocumentResponse(BaseModel):
     response: str
 
-class RagMetadata(BaseModel):
-    total_chunks_created: int
-    preview: str
-
-class RagUploadResponse(BaseModel):
-    message: str
-    document_id : int
-    filename: str
-    rag_metadata: RagMetadata
-
 class DocumentListResponse(BaseModel):
     documents: list[DocumentListItem]

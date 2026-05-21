@@ -6,8 +6,6 @@ class AIService:
         self.ollama_url = settings.OLLAMA_URL
         self.model_name = settings.OLLAMA_MODEL
 
-
-
     async def analyze_legal_text(self, text: str) -> str:
         # Avoid timeout and models token max length
         truncated_text = text[:8000]
