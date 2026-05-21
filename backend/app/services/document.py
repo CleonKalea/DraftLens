@@ -38,12 +38,9 @@ class DocumentService:
         
 
     # AI-Integration auto response (prompt)
-    async def save_and_register_document(self, file: UploadFile, storage_dir: str) -> Document:
-        clean_filename = file.filename.replace(" ", "_")
-        file_path = os.path.join(storage_dir, clean_filename)
-
-        with open(file_path, "wb") as buffer:
-            shutil.copyfileobj(file.file, buffer)
+    async def analyze_document(self, document_id) -> Document:
+        document = await self.repo.get_document(document_id)
+        file_path = document.file_path
 
         pdf_text = self._extract_text_from_pdf(file_path=file_path)
 
@@ -56,12 +53,10 @@ class DocumentService:
             print("Sending text to Ollama Llama3...")
             ai_analysis = await self.ai_service.analyze_legal_text(pdf_text)
             print("\nWaiting on Response...")
-            print(ai_analysis)
-            print("------------------------------------------------------------")
 
-        return await self.repo.create_document(filename=clean_filename, file_path=file_path)
+        return {"response": ai_analysis}
     
-    async def save_document_rag(self, file: UploadFile, storage_dir: str) -> Document:
+    async def save_document(self, file: UploadFile, storage_dir: str) -> Document:
         clean_filename = file.filename.replace(" ", "_")
         file_path = os.path.join(storage_dir, clean_filename)
 
@@ -71,8 +66,8 @@ class DocumentService:
         return await self.repo.create_document(filename=clean_filename, file_path=file_path)
         
     
-    async def process_document_pipeline(self, file_path: str, document_id: str):
-        # RAG Pipeline
+    # RAG Pipeline
+    async def vectorize_document_rag(self, file_path: str, document_id: str):
         # Extract Text
         raw_text = self._extract_text_from_pdf(file_path)
 
@@ -131,7 +126,6 @@ class DocumentService:
             "stream": False
 
         }
-
         try:
             async with httpx.AsyncClient(timeout=60.0) as client:
                 response = await client.post(ollama_url, json=payload)

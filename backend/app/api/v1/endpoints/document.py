@@ -3,7 +3,7 @@ import shutil
 from fastapi import APIRouter, Depends, UploadFile, File, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.session import get_async_db
-from app.schemas.document import DocumentResponse, RagUploadResponse
+from app.schemas.document import UploadDocumentResponse, RagUploadResponse, AnalyzeDocumentResponse, AnalyzeDocumentRequest
 from app.services.document import DocumentService
 
 router = APIRouter()
@@ -11,7 +11,7 @@ router = APIRouter()
 STORAGE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../../storage"))
 
 # Upload Document Endpoint
-@router.post("/prompt/upload", response_model=DocumentResponse, status_code=status.HTTP_201_CREATED)
+@router.post("/upload", response_model=UploadDocumentResponse, status_code=status.HTTP_201_CREATED)
 async def upload_document(
     file: UploadFile = File(...),
     db: AsyncSession = Depends(get_async_db)
@@ -22,14 +22,32 @@ async def upload_document(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Uploaded file must be a PDF"
         )
-    doc_service = DocumentService(db)
+    
+    document_service = DocumentService(db)
+
     try:
-        return await doc_service.save_and_register_document(file, storage_dir=STORAGE_DIR)
+        return await document_service.save_document(file, storage_dir=STORAGE_DIR)
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to upload pdf file to server {str(e)}"
         )
+    
+@router.post("/analyze-document", response_model=AnalyzeDocumentResponse, status_code=status.HTTP_200_OK)    
+async def analyze_document(
+    request: AnalyzeDocumentRequest,
+    db: AsyncSession = Depends(get_async_db)
+):
+    document_service = DocumentService(db)
+
+    try:
+        return await document_service.analyze_document(document_id=request.document_id)
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"failed on analyze documents function -> {str(e)}"
+        )
+
     
 @router.post("/rag/upload", response_model=RagUploadResponse, status_code=status.HTTP_201_CREATED)
 async def rag_upload_document(
@@ -43,15 +61,10 @@ async def rag_upload_document(
             detail="Uploaded file must be a PDF"
         )
     
-    doc_service = DocumentService(db)
+    document_service = DocumentService(db)
 
     try:
-        saved_document = await doc_service.save_document_rag(
-            file=file, 
-            storage_dir=STORAGE_DIR
-        )
-
-        rag_result = await doc_service.process_document_pipeline(
+        rag_result = await document_service.process_document_pipeline(
             file_path=saved_document.file_path,
             document_id=saved_document.id
         )

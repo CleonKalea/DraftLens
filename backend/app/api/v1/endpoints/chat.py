@@ -23,6 +23,6 @@ async def query_document(
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Gagal memproses pertanyaan RAG: {str(e)}"
+            detail=f"Failed to process RAG chat: {str(e)}"
         )
     
