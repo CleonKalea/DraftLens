@@ -6,6 +6,17 @@ class DocumentRepository:
     def __init__(self, db: AsyncSession):
         self.db = db
 
+    async def get_document_list(self):
+        query = select(
+            Document.id,
+            Document.filename)
+
+        result = await self.db.execute(query)
+
+        documents = result.all()
+
+        return documents
+
     async def create_document(self, filename:str, file_path: str) -> Document:
         new_document = Document(
             filename=filename,

@@ -3,7 +3,7 @@ import shutil
 from fastapi import APIRouter, Depends, UploadFile, File, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.session import get_async_db
-from app.schemas.document import UploadDocumentResponse, RagUploadResponse, AnalyzeDocumentResponse, AnalyzeDocumentRequest
+from app.schemas.document import UploadDocumentResponse, RagUploadResponse, AnalyzeDocumentResponse, AnalyzeDocumentRequest, DocumentListResponse
 from app.services.document import DocumentService
 
 router = APIRouter()
@@ -47,3 +47,15 @@ async def analyze_document(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"failed on analyze documents function -> {str(e)}"
         )
+
+@router.get("/document-list", response_model=DocumentListResponse, status_code=status.HTTP_200_OK)
+async def get_document_list(
+    db: AsyncSession = Depends(get_async_db)
+):
+    document_service = DocumentService(db)
+
+    documents = await document_service.get_document_list()
+
+    return {
+        "documents": documents
+    }

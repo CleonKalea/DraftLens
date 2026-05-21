@@ -13,6 +13,10 @@ class UploadDocumentResponse(BaseModel):
     class Config:
         from_attributes = True
 
+class DocumentListItem(BaseModel):
+    id: int
+    filename: str
+
 class AnalyzeDocumentRequest(BaseModel):
     document_id: int
 
@@ -28,3 +32,6 @@ class RagUploadResponse(BaseModel):
     document_id : int
     filename: str
     rag_metadata: RagMetadata
+
+class DocumentListResponse(BaseModel):
+    documents: list[DocumentListItem]

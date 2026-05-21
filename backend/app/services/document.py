@@ -24,6 +24,14 @@ class DocumentService:
             chunk_overlap = 200
         )
 
+    async def get_document_list(self):
+        try:
+            return await self.repo.get_document_list()
+        except Exception as e:
+            raise Exception(f"Failed to retrieve documents list")
+        
+
+
     def _extract_text_from_pdf(self, file_path:str) -> str:
         try:
             reader = PdfReader(file_path)
