@@ -1,4 +1,5 @@
 from sqlalchemy import Column, Integer, String, DateTime, Boolean
+from sqlalchemy.orm import relationship
 from app.db.session import Base
 from datetime import datetime
 
@@ -11,3 +12,5 @@ class Document(Base):
     vectorized = Column(Integer, default=0)
     status = Column(String(50), default="PENDING")
     created_at = Column(DateTime, default=datetime.now)
+
+    chat_sessions = relationship("ChatSession", back_populates="document", cascade="all, delete-orphan")

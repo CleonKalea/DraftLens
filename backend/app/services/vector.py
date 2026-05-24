@@ -31,7 +31,7 @@ class VectorService:
             metadatas=metadatas
         )
 
-    def query_relevant_chunks(self, document_id: int, query: str, top_k: int = 3) -> List[str]:
+    async def query_relevant_chunks(self, document_id: int, query: str, top_k: int = 3) -> List[str]:
         # Find most relevant chunk with user question
         collection = self.get_or_create_collection(name="draftlens_documents")
         

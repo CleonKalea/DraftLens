@@ -161,3 +161,5 @@ class DocumentService:
         except Exception as e:
             raise Exception(f"Internal Server Error on RAG: {str(e)}")
         
+    async def check_document(self, document_id: int):
+        return await self.repo.get_document(document_id=document_id)
