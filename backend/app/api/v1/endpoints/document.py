@@ -9,6 +9,18 @@ router = APIRouter()
 
 STORAGE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../../storage"))
 
+@router.get("/list", response_model=DocumentListResponse, status_code=status.HTTP_200_OK)
+async def get_document_list(
+    db: AsyncSession = Depends(get_async_db)
+):
+    document_service = DocumentService(db)
+
+    documents = await document_service.get_document_list()
+
+    return {
+        "documents": documents
+    }
+
 # Upload Document Endpoint
 @router.post("/upload", response_model=UploadDocumentResponse, status_code=status.HTTP_201_CREATED)
 async def upload_document(
@@ -32,7 +44,7 @@ async def upload_document(
             detail=f"Failed to upload pdf file to server {str(e)}"
         )
     
-@router.post("/analyze-document", response_model=AnalyzeDocumentResponse, status_code=status.HTTP_200_OK)    
+@router.post("/analyze", response_model=AnalyzeDocumentResponse, status_code=status.HTTP_200_OK)    
 async def analyze_document(
     request: AnalyzeDocumentRequest,
     db: AsyncSession = Depends(get_async_db)
@@ -46,15 +58,3 @@ async def analyze_document(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"failed on analyze documents function -> {str(e)}"
         )
-
-@router.get("/document-list", response_model=DocumentListResponse, status_code=status.HTTP_200_OK)
-async def get_document_list(
-    db: AsyncSession = Depends(get_async_db)
-):
-    document_service = DocumentService(db)
-
-    documents = await document_service.get_document_list()
-
-    return {
-        "documents": documents
-    }
