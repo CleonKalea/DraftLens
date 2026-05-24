@@ -99,11 +99,16 @@ class DocumentService:
 
             print(document)
 
-            if document.vectorized == 0:
+            if document.status == "COMPLETED" and document.vectorized == 1: 
+                pass
+
+            else:
                 print("Vectorizing")
                 await self.vectorize_document_rag(document_id=document.id, file_path=document.file_path)
+
         except Exception as e:
-            raise Exception("document id doesnt exist")
+            print(e)
+            raise
         
         # Take chunks of relevant text vector from chromadb based on user question
         relevant_chunks = self.vector_service.query_relevant_chunks(

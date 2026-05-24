@@ -36,8 +36,13 @@ class DocumentRepository:
         query = (
             update(Document)
             .where(Document.id == document_id)
-            .values(vectorized=1)
+            .values(
+                vectorized=1,
+                status="COMPLETED"
             )
-        
-        await self.db.execute(query)
+        )
+
+        result = await self.db.execute(query)
         await self.db.commit()
+
+        return result.rowcount > 0
