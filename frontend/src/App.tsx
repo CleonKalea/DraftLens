@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { FolderOpen, Bot, SendHorizontal, User, Plus } from "lucide-react";
+import ReactMarkdown from "react-markdown";
 
 export default function App() {
   const [messages, setMessages] = useState([
@@ -220,9 +221,9 @@ export default function App() {
                     <Bot className="h-3.5 w-3.5 text-zinc-400 animate-pulse" />
                     <span className="text-[10px] font-semibold uppercase tracking-wider">Ringkasan Otomatis Dokumen</span>
                   </div>
-                  <p className="text-xs text-zinc-300 leading-relaxed font-sans whitespace-pre-wrap">
-                    {docSummary}
-                  </p>
+                  <div className="text-xs text-zinc-300 leading-relaxed font-sans prose prose-invert max-w-none">
+                    <ReactMarkdown>{docSummary}</ReactMarkdown>
+                  </div>
                 </div>
               )}
               
@@ -246,7 +247,7 @@ export default function App() {
 
               <div ref={chatEndRef} />
             </div>
-          </ScrollArea>
+          </ScrollArea>   
         </div>
 
         <footer className="p-6 bg-zinc-950 border-t border-zinc-800">

@@ -1,1 +1,15 @@
 @import "tailwindcss";
+
+/* Menata style elemen hasil render Markdown di dalam kotak ringkasan */
+.prose strong {
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.prose p {
+  margin-bottom: 0.5rem;
+}
+
+.prose p:last-child {
+  margin-bottom: 0;
+}
