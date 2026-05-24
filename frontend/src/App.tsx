@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { FolderOpen, Bot, SendHorizontal, User } from "lucide-react";
+import { FolderOpen, Bot, SendHorizontal, User, Plus } from "lucide-react";
 
 export default function App() {
   const [messages, setMessages] = useState([
@@ -12,6 +12,7 @@ export default function App() {
   const [documents, setDocuments] = useState<{ id: number; filename: string }[]>([]);
   const [activeDocId, setActiveDocId] = useState<number | null>(null);
   const [docSummary, setDocSummary] = useState<string>("");
+  const activeDocument = documents.find(doc => doc.id === activeDocId);
 
   const chatEndRef = useRef<HTMLDivElement>(null);
 
@@ -31,9 +32,42 @@ export default function App() {
     }
   };
 
-  useEffect(() => {
-    fetchDocuments();
-  }, []);
+  const handleUploadFile = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const fileList = event.target.files;
+    if (!fileList || fileList.length === 0) return;
+
+    const file = fileList[0];
+
+    if (file.type !== "application/pdf") {
+      alert("Format file wajib PDF, Kal!");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const response = await fetch("http://localhost:8000/api/v1/document/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) throw new Error("Gagal mengunggah dokumen ke server");
+
+      const newDoc = await response.json();
+
+      setDocuments((prev) => [...prev, { id: newDoc.id, filename: newDoc.filename }]);
+      
+      setActiveDocId(newDoc.id);
+
+      alert(`File uploaded!: ${newDoc.filename}`);
+    } catch (error) {
+      console.error("ERROR:", error);
+      alert("An error occurred:");
+    } finally {
+      event.target.value = "";
+    }
+  };
 
   const handleSendMessage = async () => {
     if (!inputText.trim() || activeDocId === null) return;
@@ -82,8 +116,9 @@ export default function App() {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // Mencari objek dokumen yang sedang aktif untuk menampilkan nama filenya di header
-  const activeDocument = documents.find(doc => doc.id === activeDocId);
+  useEffect(() => {
+    fetchDocuments();
+  }, []);
 
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-zinc-950 text-white font-sans antialiased">
@@ -97,6 +132,20 @@ export default function App() {
         <div className="flex-1 p-4 flex flex-col min-h-0">
           <div className="text-[11px] font-medium text-zinc-500 uppercase tracking-wider mb-3 px-2">Dokumen</div>
           
+          <div className="px-2 mb-4">
+            <label className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-xl border border-dashed border-zinc-800 bg-zinc-900/30 hover:bg-zinc-900 text-zinc-400 hover:text-white text-xs font-medium cursor-pointer transition-all shadow-sm">
+              <Plus className="h-3.5 w-3.5" />
+              <span>Upload PDF Baru</span>
+              {/* Input file asli disembunyikan agar UI tetap bersih mirip Apple minimalis */}
+              <input 
+                type="file" 
+                accept=".pdf" 
+                onChange={handleUploadFile} 
+                className="hidden" 
+              />
+            </label>
+          </div>
+
           <ScrollArea className="flex-1">
             <div className="space-y-1 pr-3">
               {documents.length === 0 ? (
