@@ -113,13 +113,34 @@ export default function App() {
     }
   };
 
-  const fetchDocumentSummary = async (docId: number) => {
+  // const fetchDocumentSummary = async (docId: number) => {
+  //   setDocSummary("Sedang menganalisis dan merangkum dokumen hukum...");
+  //   try {
+  //     const response = await fetch("http://localhost:8000/api/v1/document/analyze", {
+  //       method: "POST",
+  //       headers: { "Content-Type": "application/json" },
+  //       body: JSON.stringify({ document_id: docId })
+  //     });
+
+  //     if (!response.ok) throw new Error("Gagal menganalisis dokumen");
+
+  //     const data = await response.json();
+  //     setDocSummary(data.response);
+  //   } catch (error) {
+  //     console.error("Error analyzing document:", error);
+  //     setDocSummary("Gagal memuat ringkasan otomatis untuk dokumen ini.");
+  //   }
+  // };
+
+  const handleAnalyzeDocument = async () => {
+    if (activeDocId === null) return;
+    
     setDocSummary("Sedang menganalisis dan merangkum dokumen hukum...");
     try {
       const response = await fetch("http://localhost:8000/api/v1/document/analyze", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ document_id: docId })
+        body: JSON.stringify({ document_id: activeDocId })
       });
 
       if (!response.ok) throw new Error("Gagal menganalisis dokumen");
@@ -131,15 +152,6 @@ export default function App() {
       setDocSummary("Gagal memuat ringkasan otomatis untuk dokumen ini.");
     }
   };
-
-  useEffect(() => {
-    if (activeDocId !== null) {
-      fetchDocumentSummary(activeDocId);
-    } else {
-      setDocSummary("");
-    }
-  }, [activeDocId]);
-
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -165,7 +177,6 @@ export default function App() {
             <label className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-xl border border-dashed border-zinc-800 bg-zinc-900/30 hover:bg-zinc-900 text-zinc-400 hover:text-white text-xs font-medium cursor-pointer transition-all shadow-sm">
               <Plus className="h-3.5 w-3.5" />
               <span>Upload PDF Baru</span>
-              {/* Input file asli disembunyikan agar UI tetap bersih mirip Apple minimalis */}
               <input 
                 type="file" 
                 accept=".pdf" 
@@ -185,7 +196,10 @@ export default function App() {
                   return (
                     <button
                       key={doc.id}
-                      onClick={() => setActiveDocId(doc.id)}
+                      onClick={() => {
+                        setActiveDocId(doc.id);
+                        setDocSummary("");
+                      }}
                       className={`w-full flex items-center gap-3 p-2.5 rounded-xl text-left text-xs transition-all border ${
                         isActive
                           ? "bg-zinc-900 text-white border-zinc-800 shadow-sm"
@@ -215,15 +229,29 @@ export default function App() {
           <ScrollArea className="h-full">
             <div className="max-w-2xl mx-auto space-y-4 pb-4">
 
-              {activeDocId && docSummary && (
-                <div className="p-5 rounded-2xl bg-zinc-900/40 border border-zinc-800/80 shadow-inner backdrop-blur-sm">
-                  <div className="flex items-center gap-2 mb-2 text-zinc-400">
-                    <Bot className="h-3.5 w-3.5 text-zinc-400 animate-pulse" />
-                    <span className="text-[10px] font-semibold uppercase tracking-wider">Ringkasan Otomatis Dokumen</span>
+              {activeDocId && (
+                <div className="p-5 rounded-2xl bg-zinc-900/40 border border-zinc-800/80 shadow-inner backdrop-blur-sm flex flex-col gap-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-zinc-400">
+                      <Bot className="h-3.5 w-3.5 text-zinc-400" />
+                      <span className="text-[10px] font-semibold uppercase tracking-wider">Ringkasan Otomatis Dokumen</span>
+                    </div>
+                    
+                    {!docSummary && (
+                      <Button 
+                        onClick={handleAnalyzeDocument}
+                        className="h-7 px-3 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 text-[10px] font-medium transition-all"
+                      >
+                        Mulai Analisis AI
+                      </Button>
+                    )}
                   </div>
-                  <div className="text-xs text-zinc-300 leading-relaxed font-sans prose prose-invert max-w-none">
-                    <ReactMarkdown>{docSummary}</ReactMarkdown>
-                  </div>
+
+                  {docSummary && (
+                    <div className="text-xs text-zinc-300 leading-relaxed font-sans prose prose-invert max-w-none pt-1 border-t border-zinc-900/50">
+                      <ReactMarkdown>{docSummary}</ReactMarkdown>
+                    </div>
+                  )}
                 </div>
               )}
               
