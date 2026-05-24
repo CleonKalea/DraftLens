@@ -112,6 +112,34 @@ export default function App() {
     }
   };
 
+  const fetchDocumentSummary = async (docId: number) => {
+    setDocSummary("Sedang menganalisis dan merangkum dokumen hukum...");
+    try {
+      const response = await fetch("http://localhost:8000/api/v1/document/analyze", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ document_id: docId })
+      });
+
+      if (!response.ok) throw new Error("Gagal menganalisis dokumen");
+
+      const data = await response.json();
+      setDocSummary(data.response);
+    } catch (error) {
+      console.error("Error analyzing document:", error);
+      setDocSummary("Gagal memuat ringkasan otomatis untuk dokumen ini.");
+    }
+  };
+
+  useEffect(() => {
+    if (activeDocId !== null) {
+      fetchDocumentSummary(activeDocId);
+    } else {
+      setDocSummary("");
+    }
+  }, [activeDocId]);
+
+
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
@@ -185,6 +213,18 @@ export default function App() {
         <div className="flex-1 p-6 overflow-hidden">
           <ScrollArea className="h-full">
             <div className="max-w-2xl mx-auto space-y-4 pb-4">
+
+              {activeDocId && docSummary && (
+                <div className="p-5 rounded-2xl bg-zinc-900/40 border border-zinc-800/80 shadow-inner backdrop-blur-sm">
+                  <div className="flex items-center gap-2 mb-2 text-zinc-400">
+                    <Bot className="h-3.5 w-3.5 text-zinc-400 animate-pulse" />
+                    <span className="text-[10px] font-semibold uppercase tracking-wider">Ringkasan Otomatis Dokumen</span>
+                  </div>
+                  <p className="text-xs text-zinc-300 leading-relaxed font-sans whitespace-pre-wrap">
+                    {docSummary}
+                  </p>
+                </div>
+              )}
               
               {messages.map((msg) => (
                 <div 
